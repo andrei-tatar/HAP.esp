@@ -26,27 +26,6 @@ static uint16_t version;
 static hapMqttCallback mqttConnected, mqttDisconnected, mqttPublished;
 static hapMqttDataCallback mqttData;
 
-static void ICACHE_FLASH_ATTR wifi_check_ip(void *arg)
-{
-    ETSTimer *timer = (ETSTimer*)arg;
-
-    struct ip_info ipConfig;
-    if (wifi_station_get_connect_status() == STATION_GOT_IP)
-    {
-        DEBUG_PRINT("[HAP]Connected to AP\n");
-        os_timer_disarm(timer);
-        return;
-    }
-
-    static uint8_t failedCheckTimes = 0;
-    if (++failedCheckTimes >= 10)
-    {
-        DEBUG_PRINT("[HAP]Could not connect to AP. Setting AP mode\n");
-        os_timer_disarm(timer);
-        setup_wifi_ap_mode(settings.nodeName);
-    }
-}
-
 static void ICACHE_FLASH_ATTR mqttConnectedCb(uint32_t *args)
 {
     DEBUG_PRINT("[MQTT]Connected\n");
@@ -256,19 +235,14 @@ bool ICACHE_FLASH_ATTR hap_init(const char* type, uint16_t pVersion)
 
         strcpy(settings.serverName, "hap_server");
         strcpy(settings.hapUserName, "user");
-        strcpy(settings.hapPassword, "pass");
-        settings.udpPort = 5112;
+        strcpy(settings.hapPassword, "password");
+        settings.udpPort = 5100;
         os_sprintf(settings.nodeName, "hap_%d", system_get_chip_id());
         result = setup_wifi_ap_mode(settings.nodeName);
     }
     else
     {
         DEBUG_PRINT("[HAP]Settings valid, connecting to AP %s\n", settings.ssid);
-
-        static ETSTimer timer;
-        os_timer_disarm(&timer);
-        os_timer_setfn(&timer, (os_timer_func_t *)wifi_check_ip, &timer);
-        os_timer_arm(&timer, 1000, 1);
 
         udp_init();
         result = setup_wifi_st_mode(settings.ssid, settings.password);
