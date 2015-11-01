@@ -20,7 +20,8 @@ static void ICACHE_FLASH_ATTR on_timeout(void *arg)
 		uint8_t data[2];
 		data[0] = pin0 ? '1' : '0';
 		data[1] = pin1 ? '1' : '0';
-		MQTT_Publish(client, "/hap/in", data, 2, 0, 0);
+
+		MQTT_Publish(client, settings.mqttTopic, data, 2, 0, 1);
 		lastPin0 = pin0;
 		lastPin1 = pin1;
 	}

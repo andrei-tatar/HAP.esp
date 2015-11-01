@@ -7,34 +7,27 @@
 #define KEY_SSID    "key"
 #define KEY_PASS    "password"
 #define KEY_SERVER  "server"
-#define KEY_NAME    "friendly"
-#define KEY_UDP     "udpport"
-#define KEY_HUSR    "huser"
-#define KEY_HPASS   "hpass"
+#define KEY_TOPIC   "topic"
+#define KEY_PORT    "port"
+#define KEY_MQ_USR  "mquser"
+#define KEY_MQ_PASS "mqpass"
 
 const char * config_index =
 "<!doctype html><html lang='en'><head><title>HAP Configration</title></head>\
-<body><h2>Config</h2>\
+<body style='font-family:arial'>\
+<h2>Config</h2>\
 <form method='POST'>\
 <h3>Wi-Fi</h3>\
-<input type='text' name='"KEY_SSID"' placeholder='SSID' value='%s' required/>\
-<br/>\
-<input type='text' name='"KEY_PASS"' placeholder='Password' value='%s' required/>\
-<br/>\
+SSID<br/><input type='text' name='"KEY_SSID"' value='%s' required/><br/>\
+Password<br/><input type='password' name='"KEY_PASS"' value='%s' required/><br/>\
 <h3>HAP</h3>\
-<input type='text' name='"KEY_SERVER"' placeholder='Server Name' value='%s' pattern='^[a-zA-Z0-9_]+$' required />\
-<br/>\
-<input type='text' name='"KEY_NAME"' placeholder='Node Name' value='%s' pattern='^[a-zA-Z0-9_]+$' required/>\
-<br/>\
-<input type='text' name='"KEY_UDP"' placeholder='UDP Port' value='%d' required\
-pattern='^([0-9]{1,4}|[1-5][0-9]{4}|6[0-4][0-9]{3}|65[0-4][0-9]{2}|655[0-2][0-9]|6553[0-5])$'/>\
-<br/>\
-<input type='text' name='"KEY_HUSR"' placeholder='HAP User Name' value='%s' pattern='^[a-zA-Z0-9_]+$' required />\
-<br/>\
-<input type='text' name='"KEY_HPASS"' placeholder='HAP Password' value='%s' required />\
-<br/>\
-<input type='submit' value='Save'/>\
-</form></body></html>";
+Server Name<br/><input type='text' name='"KEY_SERVER"' value='%s' pattern='^[a-zA-Z0-9_]+$' required /><br/>\
+Port<br/><input type='text' name='"KEY_PORT"' value='%d' required\
+pattern='^([0-9]{1,4}|[1-5][0-9]{4}|6[0-4][0-9]{3}|65[0-4][0-9]{2}|655[0-2][0-9]|6553[0-5])$'/><br/>\
+MQTT User<br/><input type='text' name='"KEY_MQ_USR"' value='%s' pattern='^[a-zA-Z0-9_]+$' required /><br/>\
+MQTT Password<br/><input type='text' name='"KEY_MQ_PASS"' value='%s' required /><br/>\
+Topic<br/><input type='text' name='"KEY_TOPIC"' value='%s' required/><br/>\
+<input type='submit' value='Save'/></form></body></html>";
 
 static void ICACHE_FLASH_ATTR restart(void *arg)
 {
@@ -98,7 +91,7 @@ static bool ICACHE_FLASH_ATTR handleSettingsParameter(const char* key, const cha
             return true;
         }
     }
-    else if (strcmp(key, KEY_UDP) == 0)
+    else if (strcmp(key, KEY_PORT) == 0)
     {
         int port = atoi(value);
         if (settings.udpPort != port)
@@ -107,27 +100,27 @@ static bool ICACHE_FLASH_ATTR handleSettingsParameter(const char* key, const cha
             return true;
         }
     }
-    else if (strcmp(key, KEY_NAME) == 0)
+    else if (strcmp(key, KEY_TOPIC) == 0)
     {
-        if (strcmp(settings.nodeName, value))
+        if (strcmp(settings.mqttTopic, value))
         {
-            os_strcpy(settings.nodeName, value);
+            os_strcpy(settings.mqttTopic, value);
             return true;
         }
     }
-    else if (strcmp(key, KEY_HUSR) == 0)
+    else if (strcmp(key, KEY_MQ_USR) == 0)
     {
-        if (strcmp(settings.hapUserName, value))
+        if (strcmp(settings.mqttUser, value))
         {
-            os_strcpy(settings.hapUserName, value);
+            os_strcpy(settings.mqttUser, value);
             return true;
         }
     }
-    else if (strcmp(key, KEY_HPASS) == 0)
+    else if (strcmp(key, KEY_MQ_PASS) == 0)
     {
-        if (strcmp(settings.hapPassword, value))
+        if (strcmp(settings.mqttPassword, value))
         {
-            os_strcpy(settings.hapPassword, value);
+            os_strcpy(settings.mqttPassword, value);
             return true;
         }
     }
@@ -185,12 +178,13 @@ bool ICACHE_FLASH_ATTR index_httpd_request(struct HttpdConnectionSlot *slot, uin
     if (strcasecmp(path, "/") == 0)
     {
         httpd_send_html(slot, 200, config_index,
-                settings.ssid, settings.password,
+                settings.ssid,
+				settings.password,
                 settings.serverName,
-                settings.nodeName,
                 settings.udpPort,
-                settings.hapUserName,
-                settings.hapPassword);
+                settings.mqttUser,
+                settings.mqttPassword,
+				settings.mqttTopic);
     }
     else if (strcasecmp(path, "/clear") == 0)
     {
@@ -223,22 +217,6 @@ bool ICACHE_FLASH_ATTR index_httpd_request(struct HttpdConnectionSlot *slot, uin
     else if (strcasecmp(path, "/sdk") == 0)
     {
         httpd_send_text(slot, 200, system_get_sdk_version());
-    }
-    else if (strcasecmp(path, "/upgrade") == 0)
-    {
-        httpd_send_text(slot, 200, "Checking. If newer version available, will upgrade and reboot.");
-        //ota_upgrade(NULL);
-    }
-    else if (strncasecmp(path, "/change/", 8) == 0)
-    {
-        path += 8;
-        httpd_send_text(slot, 200, "Changing type to %s\nTrying to upgrade...", path);
-        //ota_init(path, 0, 0);
-        //ota_upgrade(NULL);
-    }
-    else if (strncasecmp(path, "/gpio/", 6) == 0)
-    {
-        httpd_send_text(slot, 200, "TODO");
     }
     else
     {

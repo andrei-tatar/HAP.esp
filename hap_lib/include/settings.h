@@ -11,16 +11,18 @@
 #include <c_types.h>
 
 typedef struct {
-#define MAGIC_NUMBER    0xD1A5A0DF
+#define MAGIC_NUMBER    0xD1C5A13B
     uint32_t magicNumber;
 
     char ssid[32];
     char password[64];
+
     char serverName[64];
-    char nodeName[32];
     uint16_t udpPort;
-    char hapUserName[20];
-    char hapPassword[20];
+
+    char mqttUser[20];
+    char mqttPassword[20];
+    char mqttTopic[32];
 } HapSettings;
 
 extern HapSettings settings;

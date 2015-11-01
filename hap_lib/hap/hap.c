@@ -91,12 +91,12 @@ static void ICACHE_FLASH_ATTR udp_received(void *arg, char *data, unsigned short
             DEBUG_PRINT("[HAP]Disconnect MQTT\n");
         }
 
-        DEBUG_PRINT("[HAP]Initializing MQTT ("IPSTR":%d)\n", IP2STR(&address), hapPort);
-
         char aux[20];
         os_sprintf(aux, IPSTR, IP2STR(&address));
         MQTT_InitConnection(&mqttClient, aux, hapPort);
-        MQTT_InitClient(&mqttClient, settings.nodeName, settings.hapUserName, settings.hapPassword, MQTT_KEEPALIVE, 1);
+
+        os_sprintf(aux, "client_%d", system_get_chip_id());
+        MQTT_InitClient(&mqttClient, aux, settings.mqttUser, settings.mqttPassword, MQTT_KEEPALIVE, 1);
         MQTT_OnConnected(&mqttClient, mqttConnectedCb);
         MQTT_OnDisconnected(&mqttClient, mqttDisconnectedCb);
         MQTT_OnPublished(&mqttClient, mqttPublishedCb);
@@ -141,11 +141,14 @@ bool ICACHE_FLASH_ATTR hap_init()
         settings.ssid[0] = 0;
 
         strcpy(settings.serverName, "hap_server");
-        strcpy(settings.hapUserName, "user");
-        strcpy(settings.hapPassword, "password");
+        strcpy(settings.mqttUser, "user");
+        strcpy(settings.mqttPassword, "password");
+        strcpy(settings.mqttTopic, "/topic");
         settings.udpPort = 5100;
-        os_sprintf(settings.nodeName, "hap_%d", system_get_chip_id());
-        result = setup_wifi_ap_mode(settings.nodeName);
+
+        char aux[20];
+        os_sprintf(aux, "hap_%d", system_get_chip_id());
+        result = setup_wifi_ap_mode(aux);
     }
     else
     {
@@ -162,7 +165,6 @@ bool ICACHE_FLASH_ATTR hap_init()
 
 void user_rf_pre_init(void)
 {
-	//system_phy_set_rfoption(2);
 }
 
 void ICACHE_FLASH_ATTR hap_setConnectedCb(hapMqttCallback callback)         { mqttConnected = callback; }

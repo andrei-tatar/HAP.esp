@@ -10,6 +10,7 @@ bool ICACHE_FLASH_ATTR setup_wifi_ap_mode(const char* ssid)
     struct softap_config apConfig;
     wifi_softap_get_config(&apConfig);
     os_strcpy(apConfig.ssid, ssid);
+    apConfig.ssid_len = os_strlen(ssid);
 
     if (wifi_get_opmode() != SOFTAP_MODE)
         return false;

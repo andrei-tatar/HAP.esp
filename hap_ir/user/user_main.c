@@ -123,9 +123,7 @@ static ICACHE_FLASH_ATTR void onMqttData(MQTT_Client *client, const char* topic,
 static void ICACHE_FLASH_ATTR onMqttConnected(MQTT_Client *c)
 {
     client = c;
-    char topicName[50];
-    os_sprintf(topicName, "/hap/ir/%s", settings.nodeName);
-    MQTT_Subscribe(client, topicName, 0);
+    MQTT_Subscribe(client, settings.mqttTopic, 0);
 
     static bool firstConnected = true;
     if (!firstConnected) return;
