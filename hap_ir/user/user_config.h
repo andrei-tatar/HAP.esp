@@ -8,9 +8,6 @@
 #ifndef APP_H_
 #define APP_H_
 
-#define OTA_TYPE			"hap_ir"
-#define OTA_VERSION			1
-
 #define IR_OUT_MUX          PERIPHS_IO_MUX_MTMS_U
 #define IR_OUT_FUNC         FUNC_GPIO14
 #define IR_OUT_PIN          14

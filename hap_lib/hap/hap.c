@@ -18,8 +18,6 @@
 #include "config.h"
 
 static MQTT_Client mqttClient;
-static const char *node_type;
-static uint16_t version;
 static hapMqttCallback mqttConnected, mqttDisconnected, mqttPublished;
 static hapMqttDataCallback mqttData;
 
@@ -71,8 +69,11 @@ static void ICACHE_FLASH_ATTR udp_received(void *arg, char *data, unsigned short
         static uint16_t hapPort;
         static uint32_t hapAddress = 0;
 
+        remot_info *info = NULL;
+        espconn_get_connection_info(udpconn, &info, 0);
+
         uint16_t port = (data[3] << 8) | data[4];
-        uint32_t address = *(uint32_t*)udpconn->proto.udp->remote_ip;
+        uint32_t address = *(uint32_t*)info->remote_ip;
 
         if (port == hapPort && address == hapAddress)
             return;
@@ -90,7 +91,7 @@ static void ICACHE_FLASH_ATTR udp_received(void *arg, char *data, unsigned short
             DEBUG_PRINT("[HAP]Disconnect MQTT\n");
         }
 
-        DEBUG_PRINT("[HAP]Initializing MQTT\n");
+        DEBUG_PRINT("[HAP]Initializing MQTT ("IPSTR":%d)\n", IP2STR(&address), hapPort);
 
         char aux[20];
         os_sprintf(aux, IPSTR, IP2STR(&address));
@@ -125,11 +126,8 @@ static void ICACHE_FLASH_ATTR udp_init()
 
 bool ICACHE_FLASH_ATTR index_httpd_request(struct HttpdConnectionSlot *slot, uint8_t verb, char* path, uint8_t *data, uint16_t length);
 
-bool ICACHE_FLASH_ATTR hap_init(const char* type, uint16_t pVersion)
+bool ICACHE_FLASH_ATTR hap_init()
 {
-    node_type = type;
-    version = pVersion;
-
     settings_load();
     httpd_register(index_httpd_request);
 
@@ -164,7 +162,7 @@ bool ICACHE_FLASH_ATTR hap_init(const char* type, uint16_t pVersion)
 
 void user_rf_pre_init(void)
 {
-	system_phy_set_rfoption(2);
+	//system_phy_set_rfoption(2);
 }
 
 void ICACHE_FLASH_ATTR hap_setConnectedCb(hapMqttCallback callback)         { mqttConnected = callback; }

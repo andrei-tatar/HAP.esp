@@ -152,5 +152,5 @@ void ICACHE_FLASH_ATTR user_init()
 
     hap_setConnectedCb(onMqttConnected);
     hap_setDataReceivedCb(onMqttData);
-    hap_init(OTA_TYPE, OTA_VERSION);
+    hap_init();
 }
