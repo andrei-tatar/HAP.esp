@@ -53,7 +53,7 @@ static void ICACHE_FLASH_ATTR on_timeout(void *arg)
 {
     uint8_t i;
 
-    os_intr_lock();
+    ETS_INTR_LOCK();
     if (pos)
     {
         uint8_t pulsesData[MAX_PULSES * 2];
@@ -64,12 +64,12 @@ static void ICACHE_FLASH_ATTR on_timeout(void *arg)
             *dest++ = (pulse >> 8) & 0xFF;
             *dest++ = pulse & 0xFF;
         }
-        os_intr_unlock();
+        ETS_INTR_UNLOCK();
 
         MQTT_Publish(client, "/hap/ir", pulsesData, pos * 2, 0, 0);
     }
     else
-        os_intr_unlock();
+    	ETS_INTR_UNLOCK();
 
     pos = 0;
     first = true;

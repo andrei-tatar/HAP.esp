@@ -19,7 +19,7 @@ MODULES		= hap driver util mqtt
 EXTRA_INCDIR    = include $(SDK_BASE)/../include include/mqtt
 
 # compiler flags using during compilation of source files
-CFLAGS		= -Os -g -O2 -Wpointer-arith -Wundef -Werror -Wl,-EL -fno-inline-functions -nostdlib -mlongcalls -mtext-section-literals  -D__ets__ -DICACHE_FLASH
+CFLAGS		= -Os -g -Wpointer-arith -Wundef -Werror -Wl,-EL -fno-inline-functions -nostdlib -mlongcalls -mtext-section-literals  -D__ets__ -DICACHE_FLASH
 
 # various paths from the SDK used in this project
 SDK_INCDIR	= include include/json
