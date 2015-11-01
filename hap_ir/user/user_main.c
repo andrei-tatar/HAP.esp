@@ -66,7 +66,7 @@ static void ICACHE_FLASH_ATTR on_timeout(void *arg)
         }
         ETS_INTR_UNLOCK();
 
-        MQTT_Publish(client, "/hap/ir", pulsesData, pos * 2, 0, 0);
+        MQTT_Publish(client, settings.mqttTopic, pulsesData, pos * 2, 0, 0);
     }
     else
     	ETS_INTR_UNLOCK();
@@ -97,7 +97,7 @@ static void ICACHE_FLASH_ATTR gpio_intr(void *arg)
 
 static ICACHE_FLASH_ATTR void onMqttData(MQTT_Client *client, const char* topic, const char *data, uint32_t len)
 {
-    if (strncasecmp(topic, "/hap/ir", 7) != 0 || len % 2 != 0)
+    if (strncasecmp(topic, settings.mqttTopic, 7) != 0 || len % 2 != 0)
         return;
 
     ETS_INTR_LOCK();
