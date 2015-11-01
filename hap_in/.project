@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <projectDescription>
-	<name>hap_temp</name>
+	<name>hap_in</name>
 	<comment></comment>
 	<projects>
 	</projects>
@@ -26,7 +26,7 @@
 	</natures>
 	<filteredResources>
 		<filter>
-			<id>1424875987446</id>
+			<id>1424876005015</id>
 			<name></name>
 			<type>10</type>
 			<matcher>

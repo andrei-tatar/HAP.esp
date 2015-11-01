@@ -3,7 +3,6 @@
 	<name>hap_ir</name>
 	<comment></comment>
 	<projects>
-		<project>HapLib</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>
