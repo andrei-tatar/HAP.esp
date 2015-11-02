@@ -19,6 +19,7 @@ static uint8_t pos = 0;
 static bool first = true;
 static ETSTimer timer;
 static MQTT_Client *client = NULL;
+static char receiveTopic[50];
 
 #define IR_LED(x) GPIO_OUTPUT_SET(IR_OUT_PIN, x)
 
@@ -66,7 +67,8 @@ static void ICACHE_FLASH_ATTR on_timeout(void *arg)
         }
         ETS_INTR_UNLOCK();
 
-        MQTT_Publish(client, settings.mqttTopic, pulsesData, pos * 2, 0, 0);
+
+        MQTT_Publish(client, receiveTopic, pulsesData, pos * 2, 0, 0);
     }
     else
     	ETS_INTR_UNLOCK();
@@ -97,9 +99,6 @@ static void ICACHE_FLASH_ATTR gpio_intr(void *arg)
 
 static ICACHE_FLASH_ATTR void onMqttData(MQTT_Client *client, const char* topic, const char *data, uint32_t len)
 {
-    if (strncasecmp(topic, settings.mqttTopic, 7) != 0 || len % 2 != 0)
-        return;
-
     ETS_INTR_LOCK();
     ETS_GPIO_INTR_DISABLE();
 
@@ -123,7 +122,12 @@ static ICACHE_FLASH_ATTR void onMqttData(MQTT_Client *client, const char* topic,
 static void ICACHE_FLASH_ATTR onMqttConnected(MQTT_Client *c)
 {
     client = c;
-    MQTT_Subscribe(client, settings.mqttTopic, 0);
+
+    char topic[50];
+    os_sprintf(topic, "%s/send", settings.mqttTopic);
+    MQTT_Subscribe(client, topic, 0);
+
+    os_sprintf(receiveTopic, "%s/receive", settings.mqttTopic);
 
     static bool firstConnected = true;
     if (!firstConnected) return;
