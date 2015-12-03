@@ -21,12 +21,35 @@ static MQTT_Client mqttClient;
 static hapMqttCallback mqttConnected, mqttDisconnected, mqttPublished;
 static hapMqttDataCallback mqttData;
 
+static uint8_t lastPublished = true;
+static ETSTimer uptimeTimer;
+#define UPTIME_REPORT	10000
+
+static void ICACHE_FLASH_ATTR sendUptime(void *arg)
+{
+	static uint32_t uptime = 0;
+
+    MQTT_Client *client = arg;
+    char temperature[10];
+    if (lastPublished)
+    {
+        lastPublished = false;
+        MQTT_Publish(client, "/hap/temperature", temperature, os_strlen(temperature), 0, 0);
+    }
+
+    uptime += (UPTIME_REPORT / 1000);
+}
+
 static void ICACHE_FLASH_ATTR mqttConnectedCb(uint32_t *args)
 {
     DEBUG_PRINT("[MQTT]Connected\n");
     MQTT_Client* client = (MQTT_Client*)args;
 
     if (mqttConnected) mqttConnected(client);
+
+	os_timer_disarm(&uptimeTimer);
+	os_timer_setfn(&uptimeTimer, (os_timer_func_t *)sendUptime, client);
+	os_timer_arm(&uptimeTimer, UPTIME_REPORT, 1);
 }
 
 static void ICACHE_FLASH_ATTR mqttDisconnectedCb(uint32_t *args)
