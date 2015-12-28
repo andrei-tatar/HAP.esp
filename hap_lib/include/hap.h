@@ -22,4 +22,6 @@ void ICACHE_FLASH_ATTR hap_setDisconnectedCb(hapMqttCallback callback);
 void ICACHE_FLASH_ATTR hap_setPublishedCb(hapMqttCallback callback);
 void ICACHE_FLASH_ATTR hap_setDataReceivedCb(hapMqttDataCallback callback);
 
+uint32_t getUptimeSeconds();
+
 #endif /* INCLUDE_HAP_H_ */

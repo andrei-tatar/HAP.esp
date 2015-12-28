@@ -3,6 +3,7 @@
 #include "espconn.h"
 #include "httpd.h"
 #include "settings.h"
+#include "hap.h"
 
 #define KEY_SSID    "key"
 #define KEY_PASS    "password"
@@ -218,6 +219,15 @@ bool ICACHE_FLASH_ATTR index_httpd_request(struct HttpdConnectionSlot *slot, uin
     {
         httpd_send_text(slot, 200, system_get_sdk_version());
     }
+    else if (strcasecmp(path, "/uptime") == 0)
+	{
+    	uint32_t up = getUptimeSeconds();
+    	httpd_send_text(slot, 200, "%d days, %d hours, %d min, %d sec",
+    			up / 86400,
+    			up / 3600 % 24,
+    			up / 60 % 60,
+    			up % 60);
+	}
     else
     {
         return false;

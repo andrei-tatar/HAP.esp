@@ -126,10 +126,26 @@ static void ICACHE_FLASH_ATTR udp_init()
 
 bool ICACHE_FLASH_ATTR index_httpd_request(struct HttpdConnectionSlot *slot, uint8_t verb, char* path, uint8_t *data, uint16_t length);
 
+uint32_t uptime = 0;
+
+static void ICACHE_FLASH_ATTR uptimeIncrement(void *arg)
+{
+    uptime++;
+}
+
+uint32_t getUptimeSeconds()
+{
+	return uptime;
+}
+
 bool ICACHE_FLASH_ATTR hap_init()
 {
     settings_load();
     httpd_register(index_httpd_request);
+    static ETSTimer upTimeTimer;
+	os_timer_disarm(&upTimeTimer);
+	os_timer_setfn(&upTimeTimer, (os_timer_func_t *)uptimeIncrement, NULL);
+	os_timer_arm(&upTimeTimer, 1000, 1);
 
     bool result;
 
