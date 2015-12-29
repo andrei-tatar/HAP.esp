@@ -159,7 +159,7 @@ bool ICACHE_FLASH_ATTR hap_init()
         strcpy(settings.serverName, "hap_server");
         strcpy(settings.mqttUser, "user");
         strcpy(settings.mqttPassword, "password");
-        strcpy(settings.mqttTopic, "/topic");
+        strcpy(settings.mqttTopic, "topic");
         settings.udpPort = 5100;
 
         char aux[20];
