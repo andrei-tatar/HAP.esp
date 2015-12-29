@@ -10,6 +10,7 @@
 #include "tcn75a.h"
 #include "user_config.h"
 #include "hap.h"
+#include "settings.h"
 #include "mqtt/mqtt.h"
 
 #define LED_INIT    PIN_FUNC_SELECT(PERIPHS_IO_MUX_MTCK_U, FUNC_GPIO13)
@@ -26,7 +27,7 @@ static void send_temperature(void *arg)
     if (lastPublished && tcn_read(temperature))
     {
         lastPublished = false;
-        MQTT_Publish(client, "/hap/temperature", temperature, os_strlen(temperature), 0, 0);
+        MQTT_Publish(client, settings.mqttTopic, temperature, os_strlen(temperature), 0, 0);
     }
 }
 
