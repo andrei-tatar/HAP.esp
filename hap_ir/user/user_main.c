@@ -55,7 +55,7 @@ static void ICACHE_FLASH_ATTR on_timeout(void *arg)
     uint8_t i;
 
     ETS_INTR_LOCK();
-    if (pos)
+    if (pos>=3)
     {
         uint8_t pulsesData[MAX_PULSES * 2];
         uint8_t *dest = pulsesData;
