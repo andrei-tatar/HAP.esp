@@ -67,6 +67,9 @@ static void ICACHE_FLASH_ATTR mqttDataCb(uint32_t *args, const char* topic, uint
     os_free(topicBuf);
 }
 
+static uint16_t hapPort;
+static uint32_t hapAddress = 0;
+
 static void ICACHE_FLASH_ATTR udp_received(void *arg, char *data, unsigned short len)
 {
     struct espconn *udpconn= (struct espconn*)arg;
@@ -75,9 +78,6 @@ static void ICACHE_FLASH_ATTR udp_received(void *arg, char *data, unsigned short
         const char* hapServer = &data[5];
         if (strcmp(settings.serverName, hapServer) != 0)
             return;
-
-        static uint16_t hapPort;
-        static uint32_t hapAddress = 0;
 
         remot_info *info = NULL;
         espconn_get_connection_info(udpconn, &info, 0);
@@ -148,6 +148,16 @@ uint32_t getUptimeSeconds()
 	return uptime;
 }
 
+void onWifiEvent(System_Event_t *event) {
+	if (event->event == EVENT_STAMODE_GOT_IP) {
+		DEBUG_PRINT("[HAP]Got IP\n");
+		if (hapAddress) {
+			DEBUG_PRINT("[HAP]Reconnecting to MQTT\n");
+			MQTT_Connect(&mqttClient);
+		}
+	}
+}
+
 bool ICACHE_FLASH_ATTR hap_init()
 {
     settings_load();
@@ -156,6 +166,8 @@ bool ICACHE_FLASH_ATTR hap_init()
 	os_timer_disarm(&upTimeTimer);
 	os_timer_setfn(&upTimeTimer, (os_timer_func_t *)uptimeIncrement, NULL);
 	os_timer_arm(&upTimeTimer, 1000, 1);
+
+	wifi_set_event_handler_cb(onWifiEvent);
 
     bool result;
 
