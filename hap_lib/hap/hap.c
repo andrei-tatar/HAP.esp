@@ -26,6 +26,10 @@ static void ICACHE_FLASH_ATTR mqttConnectedCb(uint32_t *args)
     DEBUG_PRINT("[MQTT]Connected\n");
     MQTT_Client* client = (MQTT_Client*)args;
 
+    char aux[20];
+	os_sprintf(aux, "echo/%d", system_get_chip_id());
+    MQTT_Subscribe(client, aux, 0);
+
     if (mqttConnected) mqttConnected(client);
 }
 
@@ -50,6 +54,12 @@ static void ICACHE_FLASH_ATTR mqttDataCb(uint32_t *args, const char* topic, uint
 
     os_memcpy(topicBuf, topic, topic_len);
     topicBuf[topic_len] = 0;
+
+    if (topic_len > 5 && strncmp(topicBuf, "echo/", 5) == 0) {
+    	DEBUG_PRINT("[MQTT]Received ping, send back pong");
+    	MQTT_Publish(client, "echo/pong", data, data_len, 0, 0);
+    	return;
+	}
 
     DEBUG_PRINT("[MQTT]Data on topic: %s, length: %d\n", topicBuf, data_len);
 

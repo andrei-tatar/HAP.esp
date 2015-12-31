@@ -16,7 +16,7 @@
 const char * config_index =
 "<!doctype html><html lang='en'><head><title>HAP Configration</title></head>\
 <body style='font-family:arial'>\
-<h2>Config</h2>\
+<h2>Config (%d)</h2>\
 <form method='POST'>\
 <h3>Wi-Fi</h3>\
 SSID<br/><input type='text' name='"KEY_SSID"' value='%s' required/><br/>\
@@ -179,6 +179,7 @@ bool ICACHE_FLASH_ATTR index_httpd_request(struct HttpdConnectionSlot *slot, uin
     if (strcasecmp(path, "/") == 0)
     {
         httpd_send_html(slot, 200, config_index,
+        		system_get_chip_id(),
                 settings.ssid,
 				settings.password,
                 settings.serverName,
