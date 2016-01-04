@@ -204,6 +204,10 @@ bool ICACHE_FLASH_ATTR index_httpd_request(struct HttpdConnectionSlot *slot, uin
     {
         httpd_send_text(slot, 200, "%d", system_get_chip_id());
     }
+    else if (strcasecmp(path, "/rssi") == 0)
+	{
+		httpd_send_text(slot, 200, "%d", wifi_station_get_rssi());
+	}
     else if (strcasecmp(path, "/heap") == 0)
     {
         httpd_send_text(slot, 200, "%d", system_get_free_heap_size());
